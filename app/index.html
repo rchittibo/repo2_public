@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Provider Connect - Eligibility</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; max-width: 720px; }
+    input, button { padding: 10px; margin: 6px 0; width: 100%; }
+    .card { padding: 16px; border: 1px solid #ddd; border-radius: 10px; margin-top: 16px; }
+    .ok { color: green; font-weight: 700; }
+    .bad { color: #b00020; font-weight: 700; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h2>Provider Connect (Demo) - Eligibility</h2>
+
+  <label>Member ID</label>
+  <input id="memberId" placeholder="e.g., M10001" />
+
+  <label>Date (YYYY-MM-DD)</label>
+  <input id="date" placeholder="e.g., 2025-09-15" />
+
+  <button onclick="checkEligibility()">Check Eligibility</button>
+
+  <div id="result" class="card" style="display:none;"></div>
+
+<script>
+async function checkEligibility() {
+  const memberId = document.getElementById('memberId').value.trim();
+  const date = document.getElementById('date').value.trim();
+  const resultDiv = document.getElementById('result');
+  resultDiv.style.display = "block";
+  resultDiv.innerHTML = "Checking...";
+
+  try {
+    // On Static Web Apps, /api routes automatically go to the Functions backend
+    const r = await fetch(`/api/eligibility?memberId=${encodeURIComponent(memberId)}&date=${encodeURIComponent(date)}`);
+    const data = await r.json();
+
+    if (!r.ok) {
+      resultDiv.innerHTML = `<div class="bad">Error</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+      return;
+    }
+
+    const status = data.eligible ? `<span class="ok">ELIGIBLE</span>` : `<span class="bad">NOT ELIGIBLE</span>`;
+    resultDiv.innerHTML = `
+      <div>Status: ${status}</div>
+      <div><small>Member: ${data.memberId} | Date: ${data.date}</small></div>
+      <div>Plan: ${data.planCode ?? "(none)"}</div>
+      <pre>${JSON.stringify(data, null, 2)}</pre>
+    `;
+  } catch (e) {
+    resultDiv.innerHTML = `<div class="bad">Network/Runtime Error</div><pre>${e}</pre>`;
+  }
+}
+</script>
+</body>
+</html>
