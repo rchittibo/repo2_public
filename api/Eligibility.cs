@@ -30,8 +30,9 @@ public class Eligibility
         }
 
         var connStr = Environment.GetEnvironmentVariable("SqlConnectionString");
-        if (string.IsNullOrWhiteSpace(connStr))
+        if (string.IsNullOrEmpty(connStr))
         {
+            log.LogError("SqlConnectionString is null or empty");
             var r = req.CreateResponse(HttpStatusCode.InternalServerError);
             await r.WriteAsJsonAsync(new { error = "SqlConnectionString not configured." });
             return r;
